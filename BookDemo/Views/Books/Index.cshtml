@@ -1,0 +1,96 @@
+﻿@model IEnumerable<BookDemo.Models.Book>
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2 class="text-primary">Books</h2>
+
+<hr />
+<a href="@Url.Action("Create")" class="btn btn-primary my-2">
+    <i class="bi bi-plus-lg"></i>
+    Add New
+</a>
+
+
+<span id="Message" class="d-none">@TempData["Message"]</span>
+
+@if (!Model.Any())
+    {
+        <div class="alert alert-warning">
+            No books added yet!
+        </div>
+    }
+   else
+      {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Added On</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var book in Model)
+                {
+                    <tr>
+                        <td>@Html.ActionLink(book.Title, "Details", "Books", new { id = book.Id}, null)</td>
+                        <td>@book.Author</td>
+                        <td>@book.Category.Name</td>
+                        <td>@book.Description</td>
+                        <td>@book.AddedOn</td>
+                        <td>
+                            <a href="@Url.Action("Edit","Books", new {id = book.Id})" class="btn btn-primary my-2">
+                                <i class="bi bi-pencil-square"></i>
+                                Edit
+                            </a>
+                            <a href="javascript:;" class="btn btn-danger js-delete" data-id="@book.Id"><i class="bi bi-x-circle"></i>Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+@section Scripts 
+    {
+        <script>
+
+
+            $(document).ready(function () {
+                var message = $('#Message').text();
+                if (message !== '') {
+                    toastr.success(message);
+                }
+
+                $('.js-delete').on('click', function () {
+                    var btn = $(this);
+
+                    var result = confirm("Are you sure that you need to delete this book?");
+                    //console.log(result)
+                    if (result) {
+                        $.ajax({
+                            url: '/api/books/' + btn.data('id'),
+                            method: 'DELETE',
+                            success: function () {
+                                btn.parents('tr').fadeOut(function () {
+                                    this.remove();
+                                });
+                                toastr.success('Book Deleted');
+                            },
+                            error: function () {
+                                toastr.error('Something went wrong!');
+                            }
+                        });
+                    }
+                });
+                
+            });
+        </script>
+    }
+
+
+
